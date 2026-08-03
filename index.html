@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<title>Mon Parcours — La Méthode Permis (Suspensions &ge; 6 mois)</title>
+<style>
+/* ÉCRAN DE VERROUILLAGE (SÉCURITÉ CODE) */
+#auth-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:#1a1a2e;display:flex;justify-content:center;align-items:center;z-index:9999;font-family:inherit;padding:16px;}
+.auth-box{background:#fff;padding:30px;border-radius:14px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);width:100%;max-width:360px;}
+.auth-box .lock{font-size:34px;margin-bottom:8px;}
+.auth-box h2{font-size:18px;font-weight:800;color:var(--dark);margin-bottom:8px;}
+.auth-box p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.4;}
+.auth-box input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;text-align:center;font-family:inherit;margin-bottom:15px;}
+.auth-box input:focus{outline:none;border-color:var(--blue);}
+.auth-box button{width:100%;padding:13px;background:var(--blue);color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;}
+.auth-box button:active{opacity:.85;}
+#error-msg{color:var(--red);font-size:13px;font-weight:600;margin-top:12px;display:none;}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1a9ed4;--blue-l:#e8f6fd;--blue-d:#1585b5;
+  --red:#e63946;--dark:#1a1a2e;--navy:#17305a;
+  --text:#1f2937;--muted:#6b7280;--border:#e5e7eb;
+  --bg:#f3f4f6;--white:#fff;
+  --green:#16a34a;--green-l:#dcfce7;
+  --amber:#d97706;--amber-l:#fef3c7;
+  --orange:#ea580c;--orange-l:#fff7ed;
+  --purple:#7c3aed;--purple-l:#f5f3ff;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+html,body{overscroll-behavior:none;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  background:var(--bg);color:var(--text);font-size:16px;-webkit-font-smoothing:antialiased;line-height:1.5;}
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:560px;margin:0 auto;background:var(--bg);}
+
+/* BANDEAU FIXE (navbar + jauges épinglés ensemble) */
+.topbar{position:sticky;top:0;z-index:100;box-shadow:0 3px 12px rgba(23,48,90,.13);}
+.navbar{background:var(--dark);padding:calc(11px + var(--safe-top)) 16px 11px;}
+.navbar-inner{display:flex;align-items:center;gap:10px;}
+.navbar-logo{font-size:20px;flex-shrink:0;}
+.navbar-title .brand{font-size:11px;font-weight:800;letter-spacing:.09em;color:var(--red);text-transform:uppercase;display:block;line-height:1.3;}
+.navbar-title .sub{font-size:11px;color:rgba(255,255,255,.5);font-weight:500;line-height:1.35;}
+.navbar-title .sub2{font-size:10px;color:rgba(255,255,255,.4);font-weight:500;}
+
+/* DOUBLE JAUGE */
+.gauges{background:#fff;border-bottom:1px solid var(--border);padding:10px 16px;display:flex;flex-direction:column;gap:9px;}
+.gauge-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.gauge-name{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.gauge-name.g1{color:var(--navy);}.gauge-name.g2{color:var(--blue-d);}
+.gauge-meta{font-size:11px;color:var(--muted);font-weight:600;}.gauge-meta b{font-size:13px;}
+.gbar{height:9px;background:var(--border);border-radius:20px;overflow:hidden;}
+.gfill{height:100%;width:0%;border-radius:20px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.gfill.f1{background:linear-gradient(90deg,#17305a,#1a9ed4);}
+.gfill.f2{background:linear-gradient(90deg,#1585b5,#16a34a);}
+
+/* COMPTE À REBOURS */
+.countdown{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;
+  background:linear-gradient(90deg,#eafaf3,#e8f6fd);border:1px solid #d6efe4;}
+.cd-ico{font-size:17px;line-height:1;}
+.cd-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--navy);line-height:1.2;}
+.cd-val{margin-left:auto;font-size:16px;font-weight:800;color:var(--green);white-space:nowrap;text-align:right;}
+.cd-val small{display:block;font-size:10px;font-weight:600;color:var(--muted);margin-top:1px;line-height:1.2;}
+.countdown.done{background:linear-gradient(90deg,#dcfce7,#eafaf3);border-color:#bbf0c4;}
+.countdown.done .cd-label{color:var(--green);}
+
+.scroll{flex:1;padding:16px 16px calc(20px + var(--safe-bot));}
+
+/* HERO */
+.hero{background:var(--white);border-radius:14px;border:1px solid var(--border);border-bottom:3px solid var(--blue);
+  padding:18px 16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.hero h1{font-size:21px;font-weight:800;color:var(--dark);letter-spacing:-.3px;line-height:1.2;margin-bottom:5px;}
+.hero p{font-size:13px;color:var(--muted);margin-bottom:13px;}
+.mbadges{display:flex;gap:6px;flex-wrap:wrap;}
+.mb{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:5px;
+  border:1.5px solid var(--blue);color:var(--blue);background:white;}
+
+/* CARD */
+.card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.card-head{background:var(--navy);padding:12px 16px;display:flex;align-items:center;gap:9px;}
+.card-head h2{font-size:11px;font-weight:700;color:rgba(255,255,255,.92);letter-spacing:.06em;text-transform:uppercase;}
+.num-dot{width:22px;height:22px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-body{padding:16px;}
+.card-body>.intro{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+
+/* FIELDS */
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.field .lh{display:block;text-transform:none;letter-spacing:0;font-weight:500;font-size:11px;color:#9aa1ab;margin-top:2px;}
+.field select,.field input[type=date]{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;
+  font-size:15px;color:var(--text);background:white;font-family:inherit;-webkit-appearance:auto;appearance:auto;}
+.field select:focus,.field input[type=date]:focus{outline:none;border-color:var(--blue);}
+.gen-btn{width:100%;padding:15px;background:var(--blue);color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;transition:opacity .15s;}
+.gen-btn:active{opacity:.8;}
+
+/* RESULT (calcul) */
+#result{display:none;margin-top:18px;}
+#result.show{display:block;}
+.verdict{padding:13px 14px;border-radius:11px;font-size:13px;line-height:1.55;margin-bottom:14px;border-left:3px solid;display:flex;gap:10px;align-items:flex-start;}
+.verdict .vi{font-size:17px;line-height:1.2;}
+.verdict.ok{background:var(--green-l);border-color:var(--green);color:#14532d;}
+.verdict.warn{background:var(--amber-l);border-color:var(--amber);color:#78350f;}
+.verdict b{font-weight:800;}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat{background:var(--blue-l);border:1px solid #cdeaf7;border-radius:11px;padding:13px 10px;text-align:center;}
+.stat.big{grid-column:1/-1;background:var(--navy);border-color:var(--navy);}
+.sv{font-size:19px;font-weight:800;color:var(--dark);line-height:1.1;margin-bottom:3px;}
+.stat.big .sv{color:#fff;font-size:24px;}
+.sl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.stat.big .sl{color:#9fc4e8;}
+.stat.big .sv small{display:block;font-weight:500;font-size:11px;color:#b9cbdd;margin-top:3px;text-transform:none;letter-spacing:0;}
+.legalnote{background:var(--blue-l);border-left:3px solid var(--blue);border-radius:10px;padding:12px 13px;font-size:12px;color:var(--navy);line-height:1.6;}
+.legalnote b{font-weight:800;}
+.counters{display:flex;flex-direction:column;gap:9px;margin-bottom:12px;}
+.counter{border-radius:12px;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.counter.fixe{background:var(--navy);}
+.counter.dyn{background:linear-gradient(90deg,#e8f6fd,#eafaf3);border:1px solid #cdeaf7;}
+.counter.ecart{background:#f6f8fa;border:1px solid var(--border);}
+.counter.ecart.retard{background:var(--amber-l);border-color:#f0d99a;}
+.ct-lbl{font-size:12.5px;font-weight:800;line-height:1.25;}
+.counter.fixe .ct-lbl{color:#9fc4e8;}
+.counter.dyn .ct-lbl{color:var(--navy);}
+.counter.ecart .ct-lbl{color:var(--muted);}
+.ct-lbl em{display:block;font-style:normal;font-weight:500;font-size:10.5px;opacity:.8;margin-top:2px;}
+.ct-val{font-size:16px;font-weight:800;text-align:right;white-space:nowrap;}
+.counter.fixe .ct-val{color:#fff;}
+.counter.dyn .ct-val{color:var(--green);}
+.counter.ecart .ct-val{color:var(--navy);}
+.counter.ecart.retard .ct-val{color:var(--amber);}
+.counter.route{background:linear-gradient(90deg,#16a34a,#1a9ed4);}
+.counter.route .ct-lbl{color:rgba(255,255,255,.9);}
+.counter.route .ct-val{color:#fff;}
+
+/* COST */
+.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cost{background:var(--blue-l);border:1px solid #cdeaf7;border-radius:11px;padding:14px 10px;text-align:center;}
+.cost.total{grid-column:1/-1;background:var(--green-l);border-color:#bbf0c4;}
+.cost.wide{grid-column:1/-1;}
+.cost .cv{font-size:22px;font-weight:800;color:var(--navy);line-height:1;}
+.cost.total .cv{color:var(--green);}
+.cost .cl{font-size:11px;color:var(--muted);font-weight:600;margin-top:3px;}
+
+/* CALENDRIER INTERACTIF */
+.cal-case{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;position:relative;}
+.cal-case:last-child{margin-bottom:0;}
+.cal-case.now{border-color:var(--green);box-shadow:0 0 0 2px rgba(22,163,74,.13);}
+.cal-top{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--border);}
+.cal-badge{font-size:12px;font-weight:800;color:#fff;padding:4px 11px;border-radius:8px;flex-shrink:0;white-space:nowrap;}
+.cal-date{font-size:13.5px;font-weight:800;color:var(--navy);text-align:right;flex:1;}
+.cal-body{padding:12px 13px;}
+.cal-title{font-size:15px;font-weight:800;color:var(--dark);line-height:1.25;margin-bottom:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.cal-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.t-amber{background:var(--amber-l);color:var(--amber);}.t-blue{background:var(--blue-l);color:var(--blue);}
+.t-green{background:var(--green-l);color:var(--green);}.t-orange{background:var(--orange-l);color:var(--orange);}
+.t-purple{background:var(--purple-l);color:var(--purple);}.t-red{background:#fee2e2;color:#b91c1c;}
+
+.sub{margin-top:14px;}
+.sub-label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);margin-bottom:9px;padding-bottom:6px;border-bottom:1.5px solid var(--blue-l);}
+.sub-label.docs{color:var(--blue-d);}
+.sub-label .sc-count{margin-left:auto;font-size:10px;font-weight:800;color:var(--blue);background:#fff;border:1px solid #cdeaf7;padding:2px 8px;border-radius:20px;text-transform:none;}
+.docs-wrap{background:var(--blue-l);border:1px solid #d4ecf9;border-radius:11px;padding:11px;margin-top:12px;}
+.docs-wrap .sub-label{border-bottom-color:#c3e3f5;}
+.docs-wrap .chk{background:#fff;}
+.dem-block{margin-bottom:11px;}
+.dem-block:last-child{margin-bottom:0;}
+.docs-sub{margin:7px 0 0 12px;padding:10px 11px;background:var(--blue-l);border:1px solid #d4ecf9;border-left:3px solid var(--blue);border-radius:0 10px 10px 0;}
+.docs-sub-label{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--blue-d);margin-bottom:8px;}
+.docs-sub-label .sc-count{margin-left:auto;font-size:10px;font-weight:800;color:var(--blue);background:#fff;border:1px solid #cdeaf7;padding:2px 8px;border-radius:20px;text-transform:none;}
+.docs-sub .chk{background:#fff;margin-bottom:6px;padding:9px 10px;}
+.docs-sub .chk:last-child{margin-bottom:0;}
+.docs-sub .chk .ctt{font-size:13px;}
+.docs-sub .chk .ctx{font-size:11px;}
+.docs-sub .box{flex:0 0 21px;width:21px;height:21px;}
+.exam-val{margin-top:12px;padding:12px;border-radius:11px;background:#fff;border:1.5px dashed #d7c48a;}
+.exam-q{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:9px;}
+.exam-btns{display:flex;gap:9px;}
+.exam-btn{flex:1;padding:10px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;border:1.5px solid var(--border);background:#f8fafc;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.exam-btn.oui.sel{background:var(--green-l);border-color:var(--green);color:var(--green);}
+.exam-btn.non.sel{background:#fee2e2;border-color:var(--red);color:#b91c1c;}
+.exam-retry{margin-top:11px;padding:11px;border-radius:10px;background:#fff7ed;border:1px solid #f5d7b0;border-left:3px solid var(--orange);}
+.exam-retry-lbl{font-size:12px;font-weight:800;color:#9a3412;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;}
+.exam-retry-date{width:100%;padding:11px 13px;border:1.5px solid #e5c99a;border-radius:9px;font-size:15px;font-family:inherit;color:var(--text);background:#fff;}
+.exam-retry-date:focus{outline:none;border-color:var(--orange);}
+.exam-retry-note{font-size:11px;color:#9a6a3a;margin-top:7px;line-height:1.5;}
+.exam-done{font-size:12.5px;line-height:1.55;padding:10px 12px;border-radius:9px;margin-top:2px;}
+.exam-done.ok{background:var(--green-l);color:#14532d;}
+.exam-done.fail{background:#fff7ed;color:#9a3412;border:1px solid #f5d7b0;}
+.exam-ok-btn{width:100%;margin-top:9px;padding:11px;border:none;border-radius:9px;background:var(--orange);color:#fff;font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.exam-ok-btn:active{opacity:.85;}
+.cal-case.retake{border-color:#f3c0c4;border-left:3px solid var(--red);}
+.final-flag{margin-top:12px;padding:15px;border-radius:12px;background:linear-gradient(135deg,#dcfce7,#e8f6fd);border:1.5px solid #bbf0c4;}
+.ff-title{font-size:15px;font-weight:800;color:var(--green);margin-bottom:6px;}
+.ff-txt{font-size:12.5px;color:var(--navy);line-height:1.6;}
+.ff-txt b{color:var(--dark);}
+.chk.locked{opacity:.5;cursor:not-allowed;}
+.chk.locked .box{background:#eef1f4;border-color:#d3d9e0;}
+.chk.locked:hover{background:transparent;}
+.chk.done{cursor:default;}
+.chk.done:hover{background:transparent;}
+.retake-inline{margin-top:9px;padding:11px;border-radius:11px;background:#fff5f5;border:1px solid #f3c0c4;border-left:3px solid var(--red);}
+.retake-hd{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#b91c1c;margin-bottom:9px;}
+.booking{margin-top:8px;padding:11px;border-radius:11px;background:#eef7fd;border:1px solid #cfe6f5;border-left:3px solid var(--blue);}
+.bk-range{font-size:11.5px;font-weight:700;color:var(--blue-d);margin-bottom:9px;line-height:1.4;}
+.bk-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.bk-row:last-of-type{margin-bottom:0;}
+.bk-row label{font-size:11px;font-weight:700;color:var(--muted);width:44px;flex-shrink:0;}
+.bk-in{flex:1;min-width:0;padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--text);background:#fff;}
+.bk-in:focus{outline:none;border-color:var(--blue);}
+.bk-warn{font-size:11.5px;font-weight:600;color:#78350f;background:var(--amber-l);border-radius:8px;padding:8px 10px;margin-top:8px;line-height:1.4;}
+.bk-ok{width:100%;margin-top:10px;padding:11px;border:none;border-radius:9px;background:var(--blue);color:#fff;font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.bk-ok:disabled{background:#cbd5e1;color:#eef2f6;cursor:not-allowed;}
+.bk-ok:active:not(:disabled){opacity:.85;}
+.bk-valid{margin-top:10px;padding:10px;border-radius:9px;background:var(--green-l);color:#14532d;font-weight:800;font-size:13px;text-align:center;}
+
+/* CHECKBOX */
+.chk{display:flex;gap:11px;align-items:flex-start;padding:10px 11px;border:1px solid var(--border);border-radius:10px;margin-bottom:7px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.chk:last-child{margin-bottom:0;}
+.chk:active{background:#fafcfe;}
+.chk input{position:absolute;opacity:0;width:0;height:0;}
+.box{flex:0 0 23px;width:23px;height:23px;margin-top:1px;border:2px solid #c4cdd8;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.box svg{width:14px;height:14px;opacity:0;transform:scale(.5);transition:all .15s;}
+.chk input:checked ~ .box{background:var(--green);border-color:var(--green);}
+.chk input:checked ~ .box svg{opacity:1;transform:scale(1);}
+.chk input:focus-visible ~ .box{box-shadow:0 0 0 3px rgba(26,158,212,.3);}
+.chk .ct{flex:1;min-width:0;}
+.chk .ctt{font-size:13.5px;font-weight:700;color:var(--dark);line-height:1.3;margin-bottom:2px;}
+.chk .ctx{font-size:11.5px;color:var(--muted);line-height:1.5;}
+.chk .stags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.chk input:checked ~ .ct .ctt{color:var(--muted);text-decoration:line-through;}
+.chk input:checked ~ .ct .ctx{opacity:.65;}
+
+/* NOTES */
+.note{border-radius:11px;padding:12px 13px;font-size:12.5px;line-height:1.55;display:flex;gap:10px;align-items:flex-start;margin-top:12px;border-left:3px solid;}
+.note .ni{font-size:16px;line-height:1.3;}
+.note.warn{background:var(--amber-l);border-color:var(--amber);color:#78350f;}
+.note.info{background:var(--blue-l);border-color:var(--blue);color:var(--navy);}
+
+/* FINAL */
+.final-msg{background:linear-gradient(135deg,var(--blue-l),#f0faff);border:1px solid #cdeaf7;border-radius:12px;padding:15px;font-size:13px;color:var(--navy);line-height:1.6;margin-bottom:12px;}
+.final-msg b{color:var(--dark);}
+.disclaimer{background:#f8fafc;border-left:3px solid var(--muted);border-radius:10px;padding:12px 13px;font-size:11.5px;color:var(--muted);line-height:1.6;}
+
+/* ACTIONS */
+.actions{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.btn2{width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.btn-print{background:transparent;border:1.5px solid var(--border);color:var(--muted);}
+.btn-print:active{border-color:var(--blue);color:var(--blue);}
+.btn-reset{background:transparent;border:1.5px solid #f3c0c4;color:var(--red);}
+
+footer{text-align:center;padding:4px 16px calc(24px + var(--safe-bot));color:var(--muted);}
+footer .fb{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+footer .fc{font-size:10.5px;line-height:1.5;color:#9aa1ab;}
+
+@media print{.navbar,.gauges,.gen-btn,.actions,.btn2{display:none!important;}.app{max-width:100%;}.card,.hero{box-shadow:none;break-inside:avoid;}#result{display:block!important;}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="lock">🔒</div>
+    <h2>Module 2 : Accès Sécurisé</h2>
+    <p>Entrez votre code d'accès personnel pour déverrouiller ce module :</p>
+    <input type="password" id="access-code" placeholder="Votre code secret" onkeydown="if(event.key==='Enter')verifierCode()">
+    <button onclick="verifierCode()">Valider l'accès</button>
+    <div id="error-msg">Code incorrect pour ce module.</div>
+  </div>
+</div>
+<div class="app" id="main-app" style="display:none">
+
+  <div class="topbar">
+  <div class="navbar">
+    <div class="navbar-inner">
+      <span class="navbar-logo">🚗</span>
+      <div class="navbar-title">
+        <span class="brand">La Méthode Permis</span>
+        <span class="sub">Pack Les Suspensions — Module Démarches 2</span>
+        <span class="sub2">Suspension &ge; 6 mois · tests psychotechniques obligatoires</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gauges">
+    <div>
+      <div class="gauge-head">
+        <span class="gauge-name g1">📋 Démarches accomplies</span>
+        <span class="gauge-meta"><b id="g1count">0/0</b> · <span id="g1pct">0%</span></span>
+      </div>
+      <div class="gbar"><div class="gfill f1" id="g1fill"></div></div>
+    </div>
+    <div>
+      <div class="gauge-head">
+        <span class="gauge-name g2">📎 Documents réunis</span>
+        <span class="gauge-meta"><b id="g2count">0/0</b> · <span id="g2pct">0%</span></span>
+      </div>
+      <div class="gbar"><div class="gfill f2" id="g2fill"></div></div>
+    </div>
+    <div class="countdown" id="countdown">
+      <span class="cd-ico">🏁</span>
+      <span class="cd-label" id="cdLabel">Retour sur la route</span>
+      <span class="cd-val" id="cdVal"><small>calculez vos dates</small></span>
+    </div>
+  </div>
+  </div><!-- /topbar -->
+
+  <div class="scroll">
+
+    <div class="hero">
+      <h1>Mon Parcours de Récupération</h1>
+      <p>Le guide interactif complet, pas à pas — avec tests psychotechniques obligatoires et visite chez un médecin agréé en ville, sans commission médicale en préfecture. Cochez chaque action et chaque document au fil du calendrier : rien d'oublié, aucune erreur.</p>
+      <div class="mbadges">
+        <span class="mb">Suspensions &ge; 6 mois</span>
+        <span class="mb">Tests psychotechniques obligatoires</span>
+      </div>
+    </div>
+
+    <!-- 1. CALCUL -->
+    <div class="card">
+      <div class="card-head"><span class="num-dot">1</span><h2>Votre vraie date de fin de suspension</h2></div>
+      <div class="card-body">
+        <p class="intro">La durée de suspension commence à la notification. Vous devez restituer votre titre physique dans les 15 jours : au-delà, le point de départ est repoussé au jour où vous rendez votre permis.</p>
+        <div class="field">
+          <label for="dNotif">Date de notification de la suspension
+            <span class="lh">Date de signature de l'accusé de réception du courrier recommandé.</span></label>
+          <input type="date" id="dNotif">
+        </div>
+        <div class="field">
+          <label for="dDuree">Durée de la suspension<span class="lh">De 15 jours à 2 ans maximum (les suspensions ne vont pas au-delà).</span></label>
+          <select id="dDuree"><option value="15j">15 jours</option><option value="1">1 mois</option><option value="2">2 mois</option><option value="3">3 mois</option><option value="4">4 mois</option><option value="5">5 mois</option><option value="6" selected>6 mois</option><option value="7">7 mois</option><option value="8">8 mois</option><option value="9">9 mois</option><option value="10">10 mois</option><option value="11">11 mois</option><option value="12">12 mois (1 an)</option><option value="18">18 mois</option><option value="24">24 mois (2 ans)</option></select>
+        </div>
+        <div class="field">
+          <label for="dRemise">Date de restitution physique du permis
+            <span class="lh">Le jour où vous avez rendu votre titre (préfecture ou forces de l'ordre).</span></label>
+          <input type="date" id="dRemise">
+        </div>
+        <button class="gen-btn" id="btnCalc">📅 Calculer ma date de fin</button>
+        <div id="result">
+          <div class="verdict" id="verdict"></div>
+          <div class="stats">
+            <div class="stat"><div class="sv" id="svDuree">—</div><div class="sl">Durée</div></div>
+            <div class="stat"><div class="sv" id="svDepart">—</div><div class="sl">Départ retenu</div></div>
+          </div>
+          <div class="counters">
+            <div class="counter fixe"><div class="ct-lbl">🔒 Fin de suspension</div><div class="ct-val" id="svFin">—</div></div>
+            <div class="counter dyn"><div class="ct-lbl">🏁 Fin de procédure</div><div class="ct-val" id="svProc">—</div></div>
+            <div class="counter ecart" id="ctEcart"><div class="ct-lbl">⏱️ Écart<em>retard cumulé entre la fin de suspension et la fin de procédure</em></div><div class="ct-val" id="svEcart">—</div></div>
+            <div class="counter route" id="ctRoute"><div class="ct-lbl">🚗 Retour réel sur la route</div><div class="ct-val" id="svRoute">—</div></div>
+          </div>
+          <div class="legalnote">
+            <b>⚠️ À vérifier sur votre arrêté.</b> La date de départ officielle est inscrite à l'<b>Article 1er</b> de votre arrêté préfectoral. Pour un arrêté <b>3F</b>, elle court souvent dès la <b>rétention</b> (jour du contrôle). En cas de doute, fiez-vous à cette date et anticipez de 3 à 5 jours.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. COUT -->
+    <div class="card">
+      <div class="card-head"><span class="num-dot">2</span><h2>Le coût de la démarche</h2></div>
+      <div class="card-body">
+        <p class="intro">Le coût augmente en raison des tests psychotechniques obligatoires pour toute suspension ≥ 6 mois. Pas de commission médicale en préfecture.</p>
+        <div class="cost-grid">
+          <div class="cost wide"><div class="cv">70 à 120 €</div><div class="cl">Tests psychotechniques (centre agréé)</div></div>
+          <div class="cost"><div class="cv">36 €</div><div class="cl">Visite médicale (médecin agréé)</div></div>
+          <div class="cost"><div class="cv">~8 €</div><div class="cl">Photo-signature (e-photo, 5 à 10 €)</div></div>
+          <div class="cost total"><div class="cv">110 à 165 €</div><div class="cl">Total estimé</div></div>
+        </div>
+        <div class="note warn"><span class="ni">⚠️</span><span>Le coût de ce module est plus élevé que la Démarche 1, en raison des tests psychotechniques obligatoires pour toute suspension égale ou supérieure à 6 mois.</span></div>
+      </div>
+    </div>
+
+    <!-- 3. CALENDRIER INTERACTIF (démarches + documents intégrés) -->
+    <div class="card">
+      <div class="card-head"><span class="num-dot">3</span><h2>Votre calendrier interactif</h2></div>
+      <div class="card-body">
+        <p class="intro" id="planIntro">Renseignez vos dates à l'étape 1 pour dater chaque échéance. Vous pouvez cocher vos démarches et vos documents dès maintenant : tout est enregistré et fait avancer vos jauges.</p>
+        <div id="calendar"></div>
+        <div class="note warn"><span class="ni">⚠️</span><span>Sans les bons documents, les médecins refuseront de vous examiner et vous devrez reprendre un rendez-vous.</span></div>
+        <div class="note info"><span class="ni">ℹ️</span><span>Une fois votre dossier finalisé, vos documents vous confèrent une autorisation légale et provisoire de conduire pour 4 mois, en attendant votre carte.</span></div>
+      </div>
+    </div>
+
+    <!-- 4. FIN -->
+    <div class="card">
+      <div class="card-head"><span class="num-dot">4</span><h2>Fin de votre suspension</h2></div>
+      <div class="card-body">
+        <div class="final-msg">
+          ⭐ <b>Jour J — c'est la fin de votre suspension !</b> Félicitations pour votre persévérance. Une fois votre véhicule en règle (assurance, contrôle technique, carte grise), vous reprenez la route avec le nombre de points qu'il vous restait au moment de la suspension, moins les points retirés pour l'infraction.
+        </div>
+        <div class="disclaimer">
+          <b>Avertissement légal.</b> Ce guide est un outil d'accompagnement administratif fourni à titre informatif. Il ne constitue pas un conseil juridique ni un avis de droit. « La Méthode Permis » ne peut garantir vos résultats personnels aux différents examens, ceux-ci dépendant des autorités compétentes et de vos aptitudes individuelles.
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn2 btn-print" onclick="window.print()">🖨️ Imprimer mon parcours</button>
+      <button class="btn2 btn-reset" id="btnReset">↺ Tout réinitialiser</button>
+    </div>
+
+    <footer>
+      <div class="fb">🚗 La Méthode Permis — Pack Les Suspensions</div>
+      <div class="fc">© 2026 Thomas David. Outil d'accompagnement administratif. Usage personnel, non transmissible.<br>Ce document ne constitue pas un conseil juridique ou un avis de droit.</div>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+// ===== VÉRIFICATION DU CODE SÉCURISÉ — MODULE 2 =====
+const codeAttendu = "suspension2";
+window.onload = function() {
+    if (localStorage.getItem("module2_autorise") === "true") {
+        document.getElementById("auth-overlay").style.display = "none";
+        document.getElementById("main-app").style.display = "flex";
+    }
+};
+function verifierCode() {
+    const saisie = document.getElementById("access-code").value.trim();
+    if (saisie === codeAttendu) {
+        localStorage.setItem("module2_autorise", "true");
+        document.getElementById("auth-overlay").style.display = "none";
+        document.getElementById("main-app").style.display = "flex";
+        document.getElementById("error-msg").style.display = "none";
+    } else {
+        document.getElementById("error-msg").style.display = "block";
+    }
+}
+
+(function(){
+"use strict";
+var KEY="lmp_parcours_m2_v8";
+function save(s){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+function load(){try{var v=localStorage.getItem(KEY);return v?JSON.parse(v):null;}catch(e){return null;}}
+var state=load()||{dates:{},checks:{},exams:{}};
+if(!state.checks)state.checks={};
+if(!state.exams)state.exams={};
+if(!state.bookings)state.bookings={};
+var lastFin=null,adcsId=null,baseFin=null,baseNotif=null;
+var CHK='<svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var COL={blue:'#1a9ed4',amber:'#d97706',green:'#16a34a',purple:'#7c3aed',red:'#e63946',orange:'#ea580c'};
+var PLAN=[{"fromNotif":15,"day":"≤ 15 j","accent":"red","now":false,"title":"Restituer votre permis — 1ʳᵉ action","tag":["À faire en premier","red"],"desc":"Rendez votre titre physique dans les 15 jours suivant la notification de votre arrêté préfectoral de suspension (Réf 3F). Le chrono de votre suspension ne démarre qu'à partir de cette restitution.","demarches":[{"t":"Restituer votre titre physique","x":"Rendez votre permis à la préfecture ou aux forces de l'ordre, dans les 15 jours suivant la réception de l'arrêté (Réf 3F). Conservez impérativement le récépissé de remise.","tags":[["Récépissé à garder","red"]],"docs":[]}]},{"off":-37,"day":"J−37","accent":"blue","now":false,"title":"Lancement & constitution du dossier","tag":["Départ","blue"],"desc":"Vous créez votre dossier et lancez toutes les prises de rendez-vous.","demarches":[{"t":"Créer votre compte ANTS","x":"Sur ants.gouv.fr, créez votre compte (ou via FranceConnect) et accédez à votre espace.","tags":[["En ligne","blue"]],"docs":[]},{"t":"Lancer la demande de titre","x":"« Demande de titre suite à une mesure de restriction ou de suspension » — Motif : Fin de suspension. Dossier « en attente ».","tags":[["En ligne","blue"]],"docs":[{"t":"Pièce d'identité (CNI ou passeport)","x":"En cours de validité."},{"t":"Justificatif de domicile < 6 mois","x":"Facture ou avis d'imposition. Si hébergé : attestation + pièce d'identité + justificatif de l'hébergeant."},{"t":"Photo-signature numérique (e-photo)","x":"Cabine agréée ou photographe."},{"t":"Numéro NEPH","x":"Non actif."},{"t":"Notification de la sanction","x":"Imprimé 3F (préfectorale) ou 1F (judiciaire)."},{"t":"Récépissé de remise du permis","x":"Preuve de restitution de votre titre physique."}]},{"t":"Imprimer le CERFA 14880*02","x":"Téléchargez et imprimez le formulaire (inclus dans le pack).","tags":[["Document clé","amber"]],"docs":[{"t":"CERFA 14880*02 (du pack)","x":"À télécharger et imprimer."}]},{"t":"Prendre RDV aux tests psychotechniques","x":"Centre agréé. Les documents à présenter apparaîtront le jour du rendez-vous.","tags":[["Centre agréé","orange"]],"docs":[],"books":-23},{"t":"Prendre RDV chez un médecin agréé","x":"Médecin agréé en ville. Les documents à présenter apparaîtront le jour du rendez-vous.","tags":[["Médecin agréé","green"]],"docs":[],"books":-21}]},{"off":-23,"day":"J−23","accent":"orange","now":false,"exam":"Tests psychotechniques","title":"Tests psychotechniques","tag":["Valables 6 mois","orange"],"desc":"Le passage obligatoire au centre agréé, avant la visite médicale.","demarches":[{"t":"Passer les tests psychotechniques","x":"Rendez-vous au centre agréé avec les documents ci-dessous.","tags":[["Centre agréé","orange"]],"docs":[{"t":"Pièce d'identité (CNI ou passeport)","x":"En cours de validité."},{"t":"2 enveloppes rectangulaires vierges","x":"Format 22 cm × 11 cm."},{"t":"2 timbres pour courrier","x":"À ne pas coller sur les enveloppes."},{"t":"Vos lunettes de vue","x":"Si vous en portez — surtout ne pas les oublier."},{"t":"Documents relatifs à la sanction","x":"Arrêté 3F, document de remise (Réf 44), notification du jugement si judiciaire."},{"t":"Le règlement","x":"Uniquement en chèque ou espèces."}]},{"t":"Récupérer vos résultats","x":"Attestation valable 6 mois, à présenter au médecin.","tags":[["Valables 6 mois","amber"]],"docs":[]}]},{"off":-21,"day":"J−21","accent":"green","now":false,"exam":"Visite médicale","title":"Visite médicale","tag":["Après les tests","green"],"desc":"Le rendez-vous chez le médecin agréé, avec vos résultats de tests.","demarches":[{"t":"Passer la visite médicale","x":"Présentez-vous avec vos résultats de tests et les documents ci-dessous.","tags":[["Médecin agréé","green"]],"docs":[{"t":"Pièce d'identité (CNI ou passeport)","x":"En cours de validité."},{"t":"CERFA 14880*02 pré-rempli non signé","x":"Rempli par vos soins, sans signature."},{"t":"Résultats des tests psychotechniques","x":"Valables 6 mois."},{"t":"L'arrêté de suspension (Réf 3F)","x":"Envoyé par le préfet, ou décision de justice."},{"t":"Le règlement de la consultation","x":"Environ 36 €."},{"t":"Questionnaire médical","x":"À remplir avant le rendez-vous."}]},{"t":"Récupérer l'avis favorable","x":"CERFA 14880*02, mention « Aptitude » cochée.","tags":[["Document clé","amber"]],"docs":[]}]},{"off":-20,"day":"J−20","accent":"blue","now":false,"title":"Finalisation sur l'ANTS","tag":["En ligne","blue"],"desc":"Vous reprenez votre demande et téléversez les pièces.","demarches":[{"t":"Reprendre la démarche ANTS","x":"Reprenez votre demande laissée « en attente ».","tags":[["En ligne","blue"]],"docs":[]},{"t":"Envoyer les documents","x":"Téléversez les pièces ci-dessous.","tags":[["En ligne","blue"]],"docs":[{"t":"Avis médical CERFA 14880*02 favorable","x":"Mention « Aptitude » cochée."},{"t":"Résultats des tests psychotechniques","x":"Valables 6 mois."},{"t":"Récépissé de remise du permis","x":"Preuve de restitution de votre titre physique."}]}]},{"off":0,"day":"Jour J","accent":"green","now":true,"title":"Fin de suspension — ADCS","tag":["ADCS disponible","green"],"desc":"Votre ADCS est disponible : vous pouvez reprendre le volant.","demarches":[{"t":"Récupérer votre ADCS","x":"Téléchargez l'ADCS et gardez ces pièces dans le véhicule.","tags":[["ADCS","green"]],"docs":[{"t":"Pièce d'identité (CNI ou passeport)","x":"En cours de validité."},{"t":"Avis médical CERFA 14880*02 favorable","x":"Mention « Aptitude » cochée."},{"t":"Récépissé de dépôt de demande de permis","x":"Fourni par l'ANTS — à présenter en cas de contrôle."}]}]},{"off":20,"day":"≈ J+20","accent":"purple","now":false,"title":"Réception du permis","tag":["Courrier suivi","purple"],"desc":"Votre nouvelle carte arrive à votre domicile.","demarches":[{"t":"Réception du nouveau permis","x":"Nouvelle carte par lettre suivie, 15 à 20 jours après la fabrication.","tags":[["Courrier suivi","purple"]],"docs":[]}]}];
+
+var JFR=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+var MFR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+function parseD(v){if(!v)return null;return new Date(v+'T12:00:00');}
+function fmt(d){return JFR[d.getDay()]+' '+d.getDate()+' '+MFR[d.getMonth()]+' '+d.getFullYear();}
+function fmtLong(d){var m=MFR[d.getMonth()];return d.getDate()+' '+m.charAt(0).toUpperCase()+m.slice(1)+' '+d.getFullYear();}
+function addDays(d,n){var r=new Date(d.getTime());r.setDate(r.getDate()+n);return r;}
+function addMonths(d,n){var r=new Date(d.getTime());var day=r.getDate();r.setMonth(r.getMonth()+n);if(r.getDate()<day){r.setDate(0);}return r;}
+function durAdd(d,val){if(/j$/.test(val)){return addDays(d,parseInt(val,10));}return addMonths(d,parseInt(val,10));}
+function diffDays(a,b){return Math.round((b.getTime()-a.getTime())/86400000);}
+
+function tagsHTML(tags){var h="";if(tags){for(var i=0;i<tags.length;i++){h+='<span class="tag t-'+tags[i][1]+'">'+tags[i][0]+'</span>';}}return h;}
+function chkHTML(id,gauge,gkey,it,extra){
+  var checked=state.checks[id]?" checked":"";
+  var ga=gauge?(' data-gauge="'+gauge+'"'):'';
+  var gc=gkey?(' data-gc="'+gkey+'"'):'';
+  return '<label class="chk"><input type="checkbox" id="'+id+'"'+ga+gc+(extra||'')+checked+'>'+
+    '<span class="box">'+CHK+'</span>'+
+    '<span class="ct"><span class="ctt">'+it.t+'</span><span class="ctx">'+it.x+(it.tags?'<span class="stags">'+tagsHTML(it.tags)+'</span>':'')+'</span></span></label>';
+}
+
+function attemptsOf(mi){var e=state.exams[mi];if(!e||!e.attempts||!e.attempts.length){return [{result:null,at:null}];}return e.attempts;}
+function saveAttempts(mi,arr){if(!state.exams[mi])state.exams[mi]={};state.exams[mi].attempts=arr;save(state);}
+
+function confirmHTML(mi,k,att,isLast,examName,visible){
+  var show=(visible||att.result!=null)?'':'display:none;';
+  var inner="";
+  if(att.result==null){
+    inner='<div class="exam-q">🎓 <b>'+examName+'</b> — réussi ?</div>'+
+      '<div class="exam-btns">'+
+        '<button type="button" class="exam-btn oui" data-ex="'+mi+'" data-k="'+k+'" data-val="oui">✅ Oui</button>'+
+        '<button type="button" class="exam-btn non" data-ex="'+mi+'" data-k="'+k+'" data-val="non">❌ Non</button>'+
+      '</div>';
+  }else if(att.result==="oui"){
+    inner='<div class="exam-done ok">✅ <b>'+examName+' réussi !</b> Le parcours continue.</div>';
+  }else{
+    inner='<div class="exam-done fail">💪 <b>Pas de panique, ce n&#39;est qu&#39;une étape.</b> Beaucoup réussissent au rattrapage — vous êtes sur la bonne voie. On reprogramme et on ajuste simplement votre planning.</div>';
+    if(isLast){
+      var dv=att.nextDate?(' value="'+att.nextDate+'"'):'';
+      inner+='<div class="exam-retry">'+
+        '<div class="exam-retry-lbl">📅 Prise de rendez-vous — '+examName+'</div>'+
+        '<input type="date" class="exam-retry-date" data-ex="'+mi+'" data-k="'+k+'"'+dv+'>'+
+        '<button type="button" class="exam-ok-btn" data-ex="'+mi+'" data-k="'+k+'">✅ Valider la nouvelle date</button>'+
+      '</div>';
+    }
+  }
+  return '<div class="exam-val" style="'+show+'">'+inner+'</div>';
+}
+
+function bookingFormHTML(mi,di,targetOff){
+  var bid="dem_"+mi+"_"+di,bk=state.bookings[bid]||{},rangeTxt,warn="";
+  if(baseFin){var ideal=addDays(baseFin,targetOff);rangeTxt="entre le "+fmt(addDays(ideal,-5))+" et le "+fmt(addDays(ideal,5));
+    if(bk.date){var dev=Math.abs(diffDays(ideal,parseD(bk.date)));if(dev>5)warn='<div class="bk-warn">⚠️ Hors fourchette conseillée : votre fin de procédure est décalée en conséquence.</div>';}
+  }else{rangeTxt="calculez d&#39;abord vos dates à l&#39;étape 1";}
+  function esc(v){return (v||'').replace(/"/g,'&quot;');}
+  var validated=!!bk.validated,dis=validated?' disabled':'';
+  var action=validated?'<div class="bk-valid">✅ Rendez-vous validé — étape suivante débloquée</div>':'<button type="button" class="bk-ok" data-bk="'+bid+'"'+((bk.date&&bk.lieu)?'':' disabled')+'>Valider OK</button>';
+  return '<div class="booking">'+
+    '<div class="bk-range">📆 Fourchette conseillée : '+rangeTxt+'</div>'+
+    '<div class="bk-row"><label>Date</label><input type="date" class="bk-in" data-bk="'+bid+'" data-fld="date" value="'+esc(bk.date)+'"'+dis+'></div>'+
+    '<div class="bk-row"><label>Heure</label><input type="time" class="bk-in" data-bk="'+bid+'" data-fld="heure" value="'+esc(bk.heure)+'"'+dis+'></div>'+
+    '<div class="bk-row"><label>Adresse / lieu</label><input type="text" class="bk-in" data-bk="'+bid+'" data-fld="lieu" placeholder="Adresse du rendez-vous…" value="'+esc(bk.lieu)+'"'+dis+'></div>'+
+    warn+action+'</div>';
+}
+function demBlocks(m,mi){
+  var demKey="dem_"+mi,demHTML="",A=m.exam?attemptsOf(mi):null;
+  m.demarches.forEach(function(it,di){
+    var trig=(m.exam&&di===0)?' data-examtrig="'+mi+'_0"':'';
+    var need=(m.exam&&di>=1)?' data-needexam="'+mi+'"':'';
+    var book=(it.books!=null)?' data-booktrig="1"':'';
+    var demChk=chkHTML("dem_"+mi+"_"+di,"demarches",demKey,it,trig+need+book);
+    var docsHTML="";
+    if(it.docs&&it.docs.length){
+      var dKey="doc_"+mi+"_"+di,inner="";
+      it.docs.forEach(function(d,k){inner+=chkHTML("doc_"+mi+"_"+di+"_"+k,"documents",dKey,d,'');});
+      docsHTML='<div class="docs-sub"><div class="docs-sub-label">📎 Documents à cocher avant de valider<span class="sc-count" data-gc="'+dKey+'">0/'+it.docs.length+'</span></div>'+inner+'</div>';
+    }
+    demHTML+='<div class="dem-block">'+docsHTML+demChk+'</div>';
+    if(it.books!=null&&state.checks["dem_"+mi+"_"+di]){demHTML+=bookingFormHTML(mi,di,it.books);}
+    if(m.exam&&di===0){
+      demHTML+=confirmHTML(mi,0,A[0],A.length===1,m.exam,!!state.checks["dem_"+mi+"_0"]);
+      for(var k=1;k<A.length;k++){demHTML+=retakeBlockHTML(m,mi,k,A[k]);}
+    }
+  });
+  return demHTML;
+}
+
+function mainCaseHTML(m,mi){
+  var body='<div class="cal-title">'+m.title+'<span class="tag t-'+m.tag[1]+'">'+m.tag[0]+'</span></div>'+
+    '<div class="cal-desc">'+m.desc+'</div>'+
+    '<div class="sub"><div class="sub-label">📋 Démarches à faire<span class="sc-count" data-gc="dem_'+mi+'">0/'+m.demarches.length+'</span></div>'+demBlocks(m,mi)+'</div>';
+  if(m.now){
+    body+='<div class="final-flag" id="finalFlag" style="display:none">'+
+      '<div class="ff-title">🏁 Bravo, parcours terminé !</div>'+
+      '<div class="ff-txt">Félicitations, vous avez tout accompli. <b>Pensez à bien télécharger et conserver l&#39;ensemble de vos justificatifs</b> (ADCS, avis médical favorable, récépissé de dépôt) : ils sont indispensables pour rouler en toute légalité en attendant votre nouvelle carte.</div>'+
+    '</div>';
+  }
+  return '<div class="cal-case'+(m.now?' now':'')+'">'+
+    '<div class="cal-top"><span class="cal-badge" style="background:'+COL[m.accent]+'">'+m.day+'</span><span class="cal-date" id="caldate_'+mi+'">— date à calculer —</span></div>'+
+    '<div class="cal-body">'+body+'</div></div>';
+}
+
+function retakeBlockHTML(m,mi,k,att){
+  var A=attemptsOf(mi),isLast=(k===A.length-1),rid="retake_"+mi+"_"+k,vis=!!state.checks[rid];
+  var it={t:"Repasser : "+m.exam,x:"Présentez-vous à votre nouveau rendez-vous, puis confirmez le résultat ci-dessous.",tags:[["Rattrapage n°"+k,"red"]]};
+  var chk=chkHTML(rid,"",null,it,' data-examtrig="'+mi+'_'+k+'"');
+  return '<div class="retake-inline">'+
+    '<div class="retake-hd">🔁 Rattrapage n°'+k+(att.at?' — '+fmt(parseD(att.at)):'')+'</div>'+
+    '<div class="dem-block">'+chk+'</div>'+
+    confirmHTML(mi,k,att,isLast,m.exam,vis)+'</div>';
+}
+
+function examPassed(mi){var A=attemptsOf(mi),last=A[A.length-1];return !!(last&&last.result==="oui");}
+function updateLocks(){
+  var blocks=document.querySelectorAll('#calendar .dem-block');
+  var prevDone=true;
+  blocks.forEach(function(block){
+    var docs=block.querySelectorAll('.docs-sub input[type=checkbox]');
+    var demBox=block.querySelector(':scope > .chk input[type=checkbox]');
+    var allDocs=true;
+    docs.forEach(function(d){
+      var en=prevDone&&!d.checked;           // documents : libres dès que la démarche est atteinte
+      d.disabled=!en;
+      var lab=d.closest('.chk');
+      if(lab){lab.classList.toggle('locked',!prevDone&&!d.checked);lab.classList.toggle('done',d.checked);}
+      if(!d.checked)allDocs=false;
+    });
+    if(demBox){
+      var need=demBox.getAttribute('data-needexam');
+      var passOK=(need===null)?true:examPassed(+need);
+      var en=prevDone&&allDocs&&passOK&&!demBox.checked;
+      demBox.disabled=!en;
+      var lab=demBox.closest('.chk');
+      if(lab){lab.classList.toggle('locked',(!prevDone||!allDocs||!passOK)&&!demBox.checked);lab.classList.toggle('done',demBox.checked);}
+      var bookOK=true;
+      if(demBox.getAttribute('data-booktrig')!==null){var bkv=state.bookings[demBox.id];bookOK=!!(bkv&&bkv.validated);}
+      prevDone=prevDone&&demBox.checked&&bookOK;
+    }
+  });
+}
+function renderCalendar(){
+  var wrap=document.getElementById("calendar"),html="";
+  PLAN.forEach(function(m,mi){
+    if(m.now)adcsId="dem_"+mi+"_0";
+    html+=mainCaseHTML(m,mi);
+  });
+  wrap.innerHTML=html;wireEvents(wrap);updateLocks();
+}
+
+function wireEvents(wrap){
+  wrap.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+    cb.addEventListener("change",function(){
+      state.checks[cb.id]=cb.checked;save(state);
+      if(cb.getAttribute("data-examtrig")!==null||cb.getAttribute("data-booktrig")!==null){renderCalendar();recomputeDates();}
+      updateGauges();updateCountdown();updateLocks();
+    });
+  });
+  wrap.querySelectorAll('.exam-btn').forEach(function(b){
+    b.addEventListener("click",function(){
+      var mi=+b.getAttribute("data-ex"),k=+b.getAttribute("data-k"),val=b.getAttribute("data-val");
+      var A=attemptsOf(mi).slice();if(!A[k])A[k]={result:null,at:null};
+      A[k].result=val;
+      if(val==="oui"){A[k].nextDate=null;A=A.slice(0,k+1);}
+      saveAttempts(mi,A);renderCalendar();recomputeDates();updateGauges();updateCountdown();
+    });
+  });
+  wrap.querySelectorAll('.exam-retry-date').forEach(function(inp){
+    inp.addEventListener("change",function(){
+      var mi=+inp.getAttribute("data-ex"),k=+inp.getAttribute("data-k");
+      var A=attemptsOf(mi).slice();A[k].nextDate=inp.value;saveAttempts(mi,A);
+    });
+  });
+  wrap.querySelectorAll('.exam-ok-btn').forEach(function(b){
+    b.addEventListener("click",function(){
+      var mi=+b.getAttribute("data-ex"),k=+b.getAttribute("data-k");
+      var A=attemptsOf(mi).slice();var nd=A[k].nextDate;
+      if(!nd){alert("Merci d'indiquer la nouvelle date de rendez-vous.");return;}
+      A[k].nextDate=null;A[k].result="non";A=A.slice(0,k+1);A.push({result:null,at:nd});
+      saveAttempts(mi,A);renderCalendar();recomputeDates();updateGauges();updateCountdown();
+    });
+  });
+  wrap.querySelectorAll('.bk-in').forEach(function(inp){
+    inp.addEventListener("change",function(){
+      var bid=inp.getAttribute("data-bk"),fld=inp.getAttribute("data-fld");
+      if(!state.bookings[bid])state.bookings[bid]={};
+      state.bookings[bid][fld]=inp.value;save(state);
+      if(fld==="date"||fld==="lieu"){renderCalendar();recomputeDates();updateGauges();updateCountdown();}
+    });
+  });
+  wrap.querySelectorAll('.bk-ok').forEach(function(b){
+    b.addEventListener("click",function(){
+      var bid=b.getAttribute("data-bk"),bk=state.bookings[bid]||{};
+      if(!bk.date||!bk.lieu)return;
+      bk.validated=true;state.bookings[bid]=bk;save(state);
+      renderCalendar();recomputeDates();updateGauges();updateCountdown();
+    });
+  });
+}
+
+function updateGauges(){
+  [["demarches","g1"],["documents","g2"]].forEach(function(p){
+    var boxes=document.querySelectorAll('input[data-gauge="'+p[0]+'"]');
+    var total=boxes.length,done=0;boxes.forEach(function(b){if(b.checked)done++;});
+    var pct=total?Math.round(done/total*100):0;
+    document.getElementById(p[1]+"fill").style.width=pct+"%";
+    document.getElementById(p[1]+"pct").textContent=pct+"%";
+    document.getElementById(p[1]+"count").textContent=done+"/"+total;
+  });
+  document.querySelectorAll('.sc-count[data-gc]').forEach(function(el){
+    var key=el.getAttribute('data-gc'),b=document.querySelectorAll('input[data-gc="'+key+'"]'),d=0;
+    b.forEach(function(x){if(x.checked)d++;});el.textContent=d+"/"+b.length;
+  });
+}
+
+function updateCountdown(){
+  var box=document.getElementById("countdown"),val=document.getElementById("cdVal"),lab=document.getElementById("cdLabel");
+  var adcs=adcsId?document.getElementById(adcsId):null,ff=document.getElementById("finalFlag");
+  if(ff)ff.style.display=(adcs&&adcs.checked)?"":"none";
+  if(adcs&&adcs.checked){box.className="countdown done";lab.textContent="Vous pouvez reprendre la route !";val.innerHTML="🎉 C'est fait";return;}
+  box.className="countdown";lab.textContent="Retour sur la route";
+  if(!lastFin){val.innerHTML='<small>calculez vos dates</small>';return;}
+  var target=(baseFin&&baseFin.getTime()>lastFin.getTime())?baseFin:lastFin;
+  var today=new Date();today.setHours(0,0,0,0);
+  var d=Math.round((target.getTime()-today.getTime())/86400000);
+  if(d>0){val.innerHTML='J−'+d+'<small>'+fmtLong(target)+'</small>';}
+  else if(d===0){box.className="countdown done";lab.textContent="C'est le jour J !";val.innerHTML="📥 Récupérez votre ADCS";}
+  else{box.className="countdown done";lab.textContent="Vous pouvez reprendre la route !";val.innerHTML="📥 Récupérez votre ADCS";}
+}
+
+var dNotif=document.getElementById("dNotif"),dDuree=document.getElementById("dDuree"),dRemise=document.getElementById("dRemise");
+if(state.dates.notif)dNotif.value=state.dates.notif;
+if(state.dates.duree)dDuree.value=state.dates.duree;
+if(state.dates.remise)dRemise.value=state.dates.remise;
+[dNotif,dDuree,dRemise].forEach(function(el){el.addEventListener("change",function(){state.dates={notif:dNotif.value,duree:dDuree.value,remise:dRemise.value};save(state);});});
+
+function examEffective(j){var e=state.exams[j];if(!e||!e.attempts||!e.attempts.length)return null;var last=e.attempts[e.attempts.length-1];return last&&last.at?last.at:null;}
+function bookingDateFor(off){var r=null;PLAN.forEach(function(m,mi){(m.demarches||[]).forEach(function(d,di){if(d.books===off){var b=state.bookings["dem_"+mi+"_"+di];if(b&&b.date)r=b.date;}});});return r;}
+function apptDisplay(mi){var m=PLAN[mi];if(m.off!=null){var b=bookingDateFor(m.off);if(b)return b;}return null;}
+function apptEffective(mi){var m=PLAN[mi];if(m.exam){var e=examEffective(mi);if(e)return e;}if(m.off!=null&&baseFin){var b=bookingDateFor(m.off);if(b){var dev=Math.abs(diffDays(addDays(baseFin,m.off),parseD(b)));return dev<=5?null:b;}}return null;}
+function milestoneDate(m,mi){
+  if(m.fromNotif!=null)return addDays(baseNotif,m.fromNotif);
+  var disp=apptDisplay(mi);if(disp)return parseD(disp);
+  var best=null;
+  PLAN.forEach(function(mm,j){if(mm.off!=null&&mm.off<m.off){var e=apptEffective(j);if(e&&(best===null||mm.off>best.off))best={off:mm.off,date:e};}});
+  if(best){var xd=parseD(best.date);if(xd)return addDays(xd,m.off-best.off);}
+  return addDays(baseFin,m.off);
+}
+function recomputeDates(){
+  if(!baseFin)return;
+  var nowDate=null;
+  PLAN.forEach(function(m,mi){
+    var d=milestoneDate(m,mi),el=document.getElementById("caldate_"+mi);
+    if(el)el.textContent=(m.fromNotif!=null?"À restituer avant le ":"")+fmt(d);
+    if(m.now)nowDate=d;
+  });
+  lastFin=nowDate;
+  var svp=document.getElementById("svProc");if(svp&&lastFin)svp.textContent=fmtLong(lastFin);
+  var sve=document.getElementById("svEcart"),cte=document.getElementById("ctEcart");
+  if(sve&&lastFin&&baseFin){var ec=diffDays(baseFin,lastFin);if(ec<=0){sve.textContent="Aucun — dans les temps";if(cte)cte.classList.remove("retard");}else{sve.textContent="+"+ec+" jour"+(ec>1?"s":"")+" de retard";if(cte)cte.classList.add("retard");}}
+  var svr=document.getElementById("svRoute");if(svr&&lastFin&&baseFin){var route=(lastFin.getTime()>baseFin.getTime())?lastFin:baseFin;svr.textContent=fmtLong(route);}
+  var pi=document.getElementById("planIntro");
+  if(pi&&lastFin)pi.textContent="Parcours calé sur votre récupération du permis le "+fmtLong(lastFin)+". Anticipez de 3 à 5 jours par sécurité.";
+  updateCountdown();
+}
+
+function calcul(){
+  var notif=parseD(dNotif.value),remise=parseD(dRemise.value),durVal=dDuree.value;
+  if(!notif||!remise){alert("Merci de renseigner la date de notification et la date de restitution du permis.");return;}
+  var delai=diffDays(notif,remise),depart,verdict=document.getElementById("verdict");
+  if(delai<0){depart=notif;verdict.className="verdict ok";
+    verdict.innerHTML='<span class="vi">✅</span><span><b>Titre physique déjà restitué.</b> Votre suspension court depuis la notification de votre arrêté préfectoral (Réf 3F).</span>';}
+  else if(delai<=15){depart=notif;verdict.className="verdict ok";
+    verdict.innerHTML='<span class="vi">✅</span><span><b>Titre physique restitué dans les 15 jours</b> suivant la réception de votre arrêté préfectoral de suspension (Réf 3F). Le point de départ retenu est la date de notification.</span>';}
+  else{depart=remise;verdict.className="verdict warn";
+    verdict.innerHTML='<span class="vi">⚠️</span><span><b>Titre physique rendu '+delai+' jours après la notification</b> (au-delà des 15 jours suivant votre arrêté Réf 3F). Le point de départ est décalé au jour de restitution — votre suspension se termine plus tard.</span>';}
+  var fin=durAdd(depart,durVal);
+  baseFin=fin;baseNotif=notif;
+  document.getElementById("svDuree").textContent=dDuree.options[dDuree.selectedIndex].text;
+  document.getElementById("svDepart").innerHTML=fmtLong(depart);
+  document.getElementById("svFin").textContent=fmtLong(fin);
+  renderCalendar();recomputeDates();
+  document.getElementById("result").className="show";
+  document.getElementById("result").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+document.getElementById("btnCalc").addEventListener("click",calcul);
+
+document.getElementById("btnReset").addEventListener("click",function(){
+  if(!confirm("Tout réinitialiser ? Vos dates, cases cochées, validations d'examens et rattrapages seront effacés."))return;
+  state={dates:{},checks:{},exams:{},bookings:{}};save(state);
+  dNotif.value=dRemise.value="";dDuree.selectedIndex=0;
+  document.getElementById("result").className="";
+  lastFin=null;baseFin=null;baseNotif=null;
+  renderCalendar();updateGauges();updateCountdown();window.scrollTo({top:0,behavior:"smooth"});
+});
+
+renderCalendar();updateGauges();
+if(state.dates.notif&&state.dates.remise){calcul();}
+updateCountdown();
+})();
+</script>
+</body>
+</html>
